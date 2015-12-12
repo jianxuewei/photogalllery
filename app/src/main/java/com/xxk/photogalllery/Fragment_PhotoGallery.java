@@ -29,18 +29,26 @@ import java.util.ArrayList;
  * Created by xxk on 15/11/29.
  */
 public class Fragment_PhotoGallery extends Fragment {
+    private static final String TAG="Fragment_PhotoGallery";
     private GridView mGridView;
     //private TextView mTextView;
     //private ImageView mImageView;
     private ArrayList<Image> mImages = new ArrayList<>();
+    ThumbnailDownloader<ImageView> mThumbnailDownloader;
+    private ArrayList<Bitmap> mBitmaps;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
-
+        mThumbnailDownloader=new ThumbnailDownloader<>();
+        mThumbnailDownloader.start();
+        mThumbnailDownloader.getLooper();
+        Log.i(TAG,"BACKGROUND thread started");
 
     }
+
+
 
     @Nullable
     @Override
@@ -143,6 +151,7 @@ public class Fragment_PhotoGallery extends Fragment {
 
 
             if(bitmaps!=null){
+                mBitmaps=bitmaps;
                 ArrayList<String> list=new ArrayList<>();
                 //ArrayList<Bitmap> bitmaps=new ArrayList<>();
                 for (int i = 0; i < mImages.size(); i++) {
@@ -151,7 +160,8 @@ public class Fragment_PhotoGallery extends Fragment {
                     //bitmaps.add(bitmap);
                 }
                 //mImageView.setImageBitmap(bitmap);
-                mGridView.setAdapter(new GalleryAdapter(bitmaps));
+                //mGridView.setAdapter(new GalleryAdapter(bitmaps));
+                mGridView.setAdapter(new GalleryAdapter(mImages));
                 mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -162,10 +172,10 @@ public class Fragment_PhotoGallery extends Fragment {
             }
         }
     }
-    class GalleryAdapter extends ArrayAdapter<Bitmap>{
+    class GalleryAdapter extends ArrayAdapter<Image>{
 
 
-        public GalleryAdapter(ArrayList<Bitmap> list) {
+        public GalleryAdapter(ArrayList<Image> list) {
             super(getActivity(),0, list);
         }
 
@@ -174,11 +184,18 @@ public class Fragment_PhotoGallery extends Fragment {
             if(convertView==null){
                 convertView=getActivity().getLayoutInflater().inflate(R.layout.gallery_item,parent,false);
             }
-            ImageView view= (ImageView) convertView.findViewById(R.id.gallery_item_imageview);
-            view.setImageBitmap(getItem(position));
+            ImageView imageView= (ImageView) convertView.findViewById(R.id.gallery_item_imageview);
+            imageView.setImageBitmap(mBitmaps.get(position));
+            Image item=getItem(position);
+            mThumbnailDownloader.queueThumbDownload(imageView,item.getThumbnailUrl());
             return convertView;
         }
 
     }
-
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mThumbnailDownloader.quit();
+        Log.i(TAG,"Background thread destroyed");
+    }
 }
