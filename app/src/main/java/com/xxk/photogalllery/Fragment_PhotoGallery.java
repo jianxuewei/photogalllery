@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -189,7 +191,13 @@ public class Fragment_PhotoGallery extends Fragment {
                 mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        Toast.makeText(getActivity(),mImages.get(position).toString(),Toast.LENGTH_SHORT).show();
+                        Image item=mImages.get(position);
+
+                        Toast.makeText(getActivity(),item.toString(),Toast.LENGTH_SHORT).show();
+                        Uri photoPageUri= Uri.parse(item.getDownloadUrl());
+                        Intent i=new Intent(Intent.ACTION_VIEW,photoPageUri);
+                        startActivity(i);
+
                     }
                 });
                 //mGridView.setAdapter(new ArrayAdapter<String>(getActivity(),android.R.layout.simple_gallery_item,list));
