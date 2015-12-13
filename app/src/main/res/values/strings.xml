@@ -3,4 +3,8 @@
     <string name="action_settings">Settings</string>
     <string name="new_pictures_title">have a new picture</string>
     <string name="new_picture_text">hey! you have a new picture, come on!</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_activity__photopage">Photopage</string>
 </resources>

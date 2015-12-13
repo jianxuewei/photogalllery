@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest
-    package="com.xxk.photogalllery"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest package="com.xxk.photogalllery"
+          xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
@@ -27,6 +26,12 @@
             android:name=".PollyService"
             android:exported="false">
         </service>
+
+        <activity
+            android:name=".Activity_Photopage"
+            android:label="@string/title_activity_activity__photopage"
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
     </application>
 
 </manifest>
