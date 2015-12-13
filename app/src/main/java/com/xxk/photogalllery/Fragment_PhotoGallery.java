@@ -1,10 +1,12 @@
 package com.xxk.photogalllery;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -13,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -31,7 +34,8 @@ import java.util.ArrayList;
 public class Fragment_PhotoGallery extends Fragment {
     private static final String TAG="Fragment_PhotoGallery";
     private GridView mGridView;
-    //private TextView mTextView;
+    private Button mButton;
+    private int mPage=0;
     //private ImageView mImageView;
     private ArrayList<Image> mImages = new ArrayList<>();
     ThumbnailDownloader<ImageView> mThumbnailDownloader;
@@ -41,10 +45,18 @@ public class Fragment_PhotoGallery extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
-        mThumbnailDownloader=new ThumbnailDownloader<>();
+        mThumbnailDownloader=new ThumbnailDownloader<>(new Handler());
         mThumbnailDownloader.start();
         mThumbnailDownloader.getLooper();
+        mThumbnailDownloader.setOnListener(new ThumbnailDownloader.Listener<ImageView>() {
+            @Override
+            public void onThumbnailDownloaded(ImageView imageView, Bitmap bitmap) {
+                imageView.setImageBitmap(bitmap);
+            }
+        });
         Log.i(TAG,"BACKGROUND thread started");
+
+        PollyService.setAlarmService(getActivity(),true);
 
     }
 
@@ -55,10 +67,22 @@ public class Fragment_PhotoGallery extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v=inflater.inflate(R.layout.fragment_photo_gallery,container,false);
         mGridView= (GridView) v.findViewById(R.id.gridview);
-//        View v = inflater.inflate(R.layout.temp, container, false);
-//        mImageView= (ImageView) v.findViewById(R.id.imageview);
-        new BaiduConnectAsyncTask().execute("http://image.baidu.com/data/imgs?col=美女&tag=诱惑&sort=0&pn=20&rn=25&p=channel&from=1");
+        mButton= (Button) v.findViewById(R.id.button_next_page);
+
+        mPage=0;
+        new BaiduConnectAsyncTask().execute(makeUrl(mPage));
+        mButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                new BaiduConnectAsyncTask().execute(makeUrl(++mPage));
+            }
+        });
         return v;
+    }
+    String makeUrl(int page){
+        String url="http://image.baidu.com/data/imgs?col=美女&tag=诱惑&sort=0&pn="+(page*26+1)+"&rn=26&p=channel&from=1";
+        return url;
     }
     private class BaiduConnectAsyncTask extends AsyncTask<String, Void, String> {
 
@@ -185,7 +209,7 @@ public class Fragment_PhotoGallery extends Fragment {
                 convertView=getActivity().getLayoutInflater().inflate(R.layout.gallery_item,parent,false);
             }
             ImageView imageView= (ImageView) convertView.findViewById(R.id.gallery_item_imageview);
-            imageView.setImageBitmap(mBitmaps.get(position));
+            //imageView.setImageBitmap(mBitmaps.get(position));
             Image item=getItem(position);
             mThumbnailDownloader.queueThumbDownload(imageView,item.getThumbnailUrl());
             return convertView;
@@ -195,6 +219,7 @@ public class Fragment_PhotoGallery extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        mThumbnailDownloader.clearQueue();
         mThumbnailDownloader.quit();
         Log.i(TAG,"Background thread destroyed");
     }
