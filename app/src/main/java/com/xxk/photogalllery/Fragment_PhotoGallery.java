@@ -195,7 +195,11 @@ public class Fragment_PhotoGallery extends Fragment {
 
                         Toast.makeText(getActivity(),item.toString(),Toast.LENGTH_SHORT).show();
                         Uri photoPageUri= Uri.parse(item.getDownloadUrl());
-                        Intent i=new Intent(Intent.ACTION_VIEW,photoPageUri);
+                        //Intent i=new Intent(Intent.ACTION_VIEW,photoPageUri);
+                        //Uri photoPageUri=Uri.parse("http://www.baidu.com");
+                        Intent i =new Intent(getActivity(),Activity_Photopage.class);
+                        i.setData(photoPageUri);
+
                         startActivity(i);
 
                     }
